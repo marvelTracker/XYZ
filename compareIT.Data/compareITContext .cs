@@ -15,6 +15,7 @@ namespace compareIT.Data
         public CompareITContext()
             : base("CompareITContext")
         {
+            
         }
         public DbSet<Computer> Computers { get; set; }
 

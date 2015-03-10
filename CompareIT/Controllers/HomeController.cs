@@ -1,4 +1,5 @@
-﻿using System;
+﻿using compareIT.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -12,7 +13,17 @@ namespace CompareIT.Controllers
         {
             ViewBag.Title = "Home Page";
 
+            CompareITContext dbContext = new CompareITContext();
+
+            dbContext.Computers.Add(new compareIT.Data.Model.Computer() { Name = "Toshiba" });
+
+            dbContext.SaveChanges();
+
+            var computer = dbContext.Computers.ToList();
+
             return View();
         }
+
+        
     }
 }

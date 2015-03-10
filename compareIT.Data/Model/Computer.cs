@@ -8,6 +8,7 @@ namespace compareIT.Data.Model
 {
     public class Computer
     {
+        
         public int ComputerID { get; set; }
         public string Name { get; set; }
         public string ShortDescription { get; set; }
