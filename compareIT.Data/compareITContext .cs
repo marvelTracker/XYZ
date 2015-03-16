@@ -13,7 +13,7 @@ namespace compareIT.Data
     {
 
         public CompareITContext()
-            : base("CompareITContext")
+            : base("name=CompareITContext")
         {
             
         }
