@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using compareIT.Data.Model;
+using EF6Ninja.Model;
 
 namespace compareIT.Data
 {
@@ -18,6 +19,8 @@ namespace compareIT.Data
             
         }
         public DbSet<Computer> Computers { get; set; }
+
+        public DbSet<LaptopMetaData> LaptopMetaDataList { get;set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

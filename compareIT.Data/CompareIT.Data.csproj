@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="compareITContext .cs" />
     <Compile Include="Model\Computer.cs" />
+    <Compile Include="Model\LaptopMetadata.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
