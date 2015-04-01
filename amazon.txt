@@ -18,8 +18,8 @@ namespace CompareIT.Controllers
 {
     public class HomeControllerq : Controller
     {
-        private const string MY_AWS_ACCESS_KEY_ID = "AKIAI6UPCHCJW3RGIDSA";
-        private const string MY_AWS_SECRET_KEY = "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";
+        private const string MY_AWS_ACCESS_KEY_ID = "AKIAI6UPCHCJW3RGIDSA34343434343434";
+        private const string MY_AWS_SECRET_KEY = "9SiS2w1DXQWHCudwafT8+yy9L5EdFbiAkbJQd1/P23423332323232323";
         private const string DESTINATION = "ecs.amazonaws.com";
 
         private const string NAMESPACE = "http://webservices.amazon.com/AWSECommerceService/";
@@ -206,6 +206,12 @@ namespace Media.AppHelpers.Amazon.Signing
 
 
 
+
+http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemLookup.html
+
+https://forums.aws.amazon.com/message.jspa?messageID=315754#315754
+
+http://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemSearch.html
 
 
 
