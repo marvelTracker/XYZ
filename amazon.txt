@@ -1,0 +1,213 @@
+using compareIT.Data;
+using CompareIT.AWSECommerceService;
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Web;
+using System.Web.Mvc;
+using Media.AppHelpers.Amazon;
+using Media.AppHelpers.Amazon.Signing;
+
+
+
+namespace CompareIT.Controllers
+{
+    public class HomeControllerq : Controller
+    {
+        private const string MY_AWS_ACCESS_KEY_ID = "AKIAI6UPCHCJW3RGIDSA";
+        private const string MY_AWS_SECRET_KEY = "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";
+        private const string DESTINATION = "ecs.amazonaws.com";
+
+        private const string NAMESPACE = "http://webservices.amazon.com/AWSECommerceService/";
+        private const string ITEM_ID = "0545010225";
+        public ActionResult Index()
+        {
+            ViewBag.Title = "Home Page";
+
+
+
+
+            //ItemSearchRequest request = new ItemSearchRequest();
+
+
+            //// Fill request object with request parameters
+            //request.ResponseGroup = new string[] { "ItemAttributes" };
+
+            //// Set SearchIndex to All and use the scanned EAN
+            //// as the keyword, this should generate a single response 
+            //request.SearchIndex = "All";
+            //request.Keywords = "dell latitude e7440";
+
+            //// Make the item search 
+            //ItemSearch search = new ItemSearch();
+
+            //// It is ABSOLUTELY CRITICAL that you change
+            //// the AWSAccessKeyID to YOUR uniqe value
+            //// Signup for an account (and AccessKeyID) at http://aws.amazon.com/ 
+            //search.AWSAccessKeyId = "[" + MY_AWS_ACCESS_KEY_ID + "]";
+
+            //// Set the request on the search wrapper - multiple requests
+            //// can be submitted on one search
+            //search.Request = new ItemSearchRequest[] { request };
+
+            //// Make the port
+           
+
+            AWSECommerceServicePortTypeClient client = new AWSECommerceServicePortTypeClient("AWSECommerceServicePortUS");
+            client.ChannelFactory.Endpoint.Behaviors.Add(
+            new AmazonSigningEndpointBehavior(
+            MY_AWS_ACCESS_KEY_ID,
+            MY_AWS_SECRET_KEY));
+
+            //ItemLookup lookup = new ItemLookup();
+            ////lookup.AssociateTag = "123";
+            //lookup.AWSAccessKeyId = MY_AWS_ACCESS_KEY_ID;
+
+            //ItemLookupRequest itemLookupRequest = new ItemLookupRequest();
+            //itemLookupRequest.IdTypeSpecified = true;
+            //itemLookupRequest.IdType = ItemLookupRequestIdType.ASIN;
+            //itemLookupRequest.ItemId = new String[] { "B00008OE6I" };
+            ////itemLookupRequest.ResponseGroup = new String[] { "OfferSummary" };
+            //lookup.Request = new ItemLookupRequest[] { itemLookupRequest };
+
+            //ItemLookupResponse response = client.ItemLookup(lookup);
+
+            ItemSearch itemsearch = new ItemSearch { AWSAccessKeyId = MY_AWS_ACCESS_KEY_ID };
+            var isrequest = new ItemSearchRequest { Keywords = "Rocket", SearchIndex = "Toys" };
+            itemsearch.Request = new ItemSearchRequest[] { isrequest };
+
+           ItemSearchResponse isres= client.ItemSearch(itemsearch);
+                
+            //Send the request, store the response and display some of the results
+           
+
+            
+            
+            //CompareITContext dbContext = new CompareITContext();
+
+            //dbContext.Computers.Add(new compareIT.Data.Model.Computer() { Name = "Toshiba" });
+
+            //dbContext.SaveChanges();
+
+            //var computer = dbContext.Computers.ToList();
+
+            return View();
+        }
+
+
+
+        
+
+        
+    }
+}
+
+
+
+
+using System.ServiceModel.Channels;
+using System.Xml;
+
+using System.ServiceModel.Description;
+using System.ServiceModel.Dispatcher;
+
+using System.Security.Cryptography;
+using System.ServiceModel;
+
+using System.Text;
+using System.Text.RegularExpressions;
+using System;
+
+
+namespace Media.AppHelpers.Amazon.Signing
+{
+    public class AmazonHeader : MessageHeader
+    {
+        private string name;
+        private string value;
+
+        public AmazonHeader(string name, string value)
+        {
+            this.name = name;
+            this.value = value;
+        }
+
+        public override string Name { get { return name; } }
+        public override string Namespace { get { return "http://security.amazonaws.com/doc/2007-01-01/"; } }
+
+        protected override void OnWriteHeaderContents(XmlDictionaryWriter xmlDictionaryWriter, MessageVersion messageVersion)
+        {
+            xmlDictionaryWriter.WriteString(value);
+        }
+    }
+
+     public class AmazonSigningEndpointBehavior : IEndpointBehavior
+    {
+        private string accessKeyId = "";
+        private string secretKey = "";
+
+        public AmazonSigningEndpointBehavior(string accessKeyId, string secretKey)
+        {
+            this.accessKeyId = accessKeyId;
+            this.secretKey = secretKey;
+        }
+
+        public void ApplyClientBehavior(ServiceEndpoint serviceEndpoint, ClientRuntime clientRuntime)
+        {
+            clientRuntime.MessageInspectors.Add(new AmazonSigningMessageInspector(accessKeyId, secretKey));
+        }
+
+        public void ApplyDispatchBehavior(ServiceEndpoint serviceEndpoint, EndpointDispatcher endpointDispatcher) { return; }
+        public void Validate(ServiceEndpoint serviceEndpoint) { return; }
+        public void AddBindingParameters(ServiceEndpoint serviceEndpoint, BindingParameterCollection bindingParameters) { return; }
+    }
+
+     public class AmazonSigningMessageInspector : IClientMessageInspector
+    {
+        private string accessKeyId = "";
+        private string secretKey = "";
+
+        public AmazonSigningMessageInspector(string accessKeyId, string secretKey)
+        {
+            this.accessKeyId = accessKeyId;
+            this.secretKey = secretKey;
+        }
+
+        public object BeforeSendRequest(ref Message request, IClientChannel channel)
+        {
+            // prepare the data to sign
+            string operation = Regex.Match(request.Headers.Action, "[^/]+$").ToString();
+            DateTime now = DateTime.UtcNow;
+            string timestamp = now.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            string signMe = operation + timestamp;
+            byte[] bytesToSign = Encoding.UTF8.GetBytes(signMe);
+
+            // sign the data
+            byte[] secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);
+            HMAC hmacSha256 = new HMACSHA256(secretKeyBytes);
+            byte[] hashBytes = hmacSha256.ComputeHash(bytesToSign);
+            string signature = Convert.ToBase64String(hashBytes);
+
+            // add the signature information to the request headers
+            request.Headers.Add(new AmazonHeader("AWSAccessKeyId", accessKeyId));
+            request.Headers.Add(new AmazonHeader("Timestamp", timestamp));
+            request.Headers.Add(new AmazonHeader("Signature", signature));
+
+            return null;
+        }
+
+        public void AfterReceiveReply(ref Message reply, object correlationState) { }
+    }
+}
+
+
+
+
+
+
+
+
